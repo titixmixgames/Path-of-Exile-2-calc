@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0f0d0b">
+
+<!-- SEO -->
+<title>PoE 2 Armour &amp; EHP Calculator – Physical Damage Reduction</title>
+<meta name="description" content="Free Path of Exile 2 armour calculator: physical damage reduction by hit size, effective hit pool, the biggest hit you survive and armour needed for the 90% cap. Calculadora en español.">
+<meta name="keywords" content="Path of Exile 2 armour calculator, PoE 2 EHP calculator, PoE2 physical damage reduction, armour formula PoE 2, calculadora armadura Path of Exile 2, PoE 2 armadura EHP">
+<meta name="author" content="Exile's Workshop">
+<meta name="robots" content="index, follow">
+<!-- TODO: sustituye por tu dominio real tras el despliegue -->
+<link rel="canonical" href="https://TU-DOMINIO.com/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Exile's Workshop">
+<meta property="og:title" content="PoE 2 Armour & EHP Calculator – How much does a heavier hit pierce?">
+<meta property="og:description" content="Armour / (Armour + 10 × hit). See your real physical reduction, EHP and the biggest hit you survive.">
+<meta property="og:url" content="https://TU-DOMINIO.com/">
+<!-- TODO: sube una imagen 1200x630 px (og-image.png) a la raíz del proyecto -->
+<meta property="og:image" content="https://TU-DOMINIO.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Path of Exile 2 armour and EHP calculator">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PoE 2 Armour & EHP Calculator">
+<meta name="twitter:description" content="Real physical reduction by hit size, EHP and max survivable hit.">
+<meta name="twitter:image" content="https://TU-DOMINIO.com/og-image.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "PoE 2 Armour & EHP Calculator",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "inLanguage": ["en", "es"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "description": "Path of Exile 2 armour, physical damage reduction and effective hit pool calculator."
+}
+</script>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2l12 5v9c0 7-5 12-12 14C9 28 4 23 4 16V7z' fill='%23140f0c' stroke='%23cfb27a' stroke-width='2'/%3E%3Cpath d='M16 8l5 8-5 9-5-9z' fill='%23cfb27a' fill-opacity='.85'/%3E%3C/svg%3E">
+
+<!-- Fuentes: IM Fell English SC (título) · Cormorant Garamond (subtítulos y cifras) · EB Garamond (texto y botones) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#0d0b0a; --input:#0e0c0a;
+  --line:#574b3a; --line-soft:#3a3228;
+  --ink:#f1e5ce; --bone:#d0c3ac; --muted:#a99e8f; --dim:#8a7e6f;
+  --gold:#cfb27a; --gold-hi:#f0d79e; --gold-lo:#8a6f44;
+  --blood:#a73f35; --blood-hi:#e0705c; --steel:#7fa6b8;
+  --bad:#ef9a8e;
+  --f-title:'IM Fell English SC','Palatino Linotype',Georgia,serif;
+  --f-sub:'Cormorant Garamond','Palatino Linotype',Georgia,serif;
+  --f-body:'EB Garamond','Palatino Linotype',Georgia,'Times New Roman',serif;
+  --c:11px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;min-width:280px}
+body{
+  margin:0;min-height:100vh;color:var(--bone);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  font-variant-numeric:lining-nums;
+  background:
+    radial-gradient(ellipse 65% 36% at 50% -6%,rgba(140,48,36,.24),transparent 74%),
+    radial-gradient(ellipse 50% 45% at 0% 85%,rgba(100,80,50,.10),transparent 75%),
+    linear-gradient(180deg,#130e0c 0%,var(--bg) 45%,#080605 100%);
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px;border-radius:2px}
+h1,h2,h3,p{margin-top:0}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.ic{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.dust{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.dust span{position:absolute;bottom:-10px;left:var(--x);width:var(--s);height:var(--s);border-radius:50%;opacity:0;background:radial-gradient(circle,#f2c08a,#a73f35 50%,transparent 72%);animation:rise var(--d) linear var(--l) infinite}
+@keyframes rise{0%{transform:translate3d(0,0,0);opacity:0}10%{opacity:.7}100%{transform:translate3d(var(--dx),-108vh,0);opacity:0}}
+.page{position:relative;z-index:1;width:min(1120px,calc(100% - 36px));margin:0 auto;padding:6px 0 40px}
+
+/* ============ TOPBAR ============ */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:76px;border-bottom:1px solid #393226}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-symbol{width:32px;height:38px;flex:none;color:var(--gold);filter:drop-shadow(0 0 9px rgba(199,142,69,.25))}
+.brand-name{display:block;font-family:var(--f-title);font-size:19px;letter-spacing:.1em;line-height:1.1;color:#e8d6b2;white-space:nowrap}
+.brand-detail{display:block;margin-top:3px;font-family:var(--f-sub);font-weight:700;font-size:12.5px;letter-spacing:.28em;color:#9a8666;text-transform:uppercase}
+.langs{display:inline-flex;gap:3px;padding:3px;border:1px solid #524533;background:linear-gradient(#1c1917,#100f0e);flex:none}
+.langs button{border:0;background:transparent;min-width:42px;height:34px;padding:0 10px;color:#a59884;font-weight:600;font-size:15px;letter-spacing:.1em;transition:background .2s,color .2s}
+.langs button:hover{color:var(--ink)}
+.langs button[aria-pressed="true"]{color:#17120f;background:linear-gradient(#e8cc93,#ae8c58);box-shadow:inset 0 1px rgba(255,255,255,.3)}
+
+/* ============ HERO ============ */
+.hero{text-align:center;padding:26px 0 26px}
+.emblem{display:block;width:min(250px,64vw);height:auto;margin:0 auto 4px;overflow:visible}
+.emblem .glow{animation:flick 3.6s ease-in-out infinite alternate}
+.emblem .ring{transform-box:fill-box;transform-origin:center;animation:spin 100s linear infinite}
+.emblem .body{animation:hit 5s ease-in-out infinite}
+.emblem .slash{stroke-dasharray:96;stroke-dashoffset:96;opacity:0;animation:slash 5s ease-out infinite}
+.emblem .spark{transform-box:fill-box;transform-origin:center;opacity:0;animation:spark 5s ease-out infinite}
+.emblem .ripple{transform-box:fill-box;transform-origin:center;opacity:0;animation:ripple 5s ease-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes flick{from{opacity:.7}to{opacity:1}}
+@keyframes slash{0%,4%{stroke-dashoffset:96;opacity:0}6%{opacity:1}14%{stroke-dashoffset:0;opacity:1}30%,100%{stroke-dashoffset:0;opacity:0}}
+@keyframes spark{0%,12%{transform:scale(0);opacity:0}16%{transform:scale(1.15);opacity:1}34%,100%{transform:scale(1.5);opacity:0}}
+@keyframes ripple{0%,13%{transform:scale(.2);opacity:0}16%{opacity:.8}46%,100%{transform:scale(1.9);opacity:0}}
+@keyframes hit{0%,13%,22%,100%{transform:translate(0,0)}15%{transform:translate(2.5px,1.5px)}18%{transform:translate(-1px,-.5px)}}
+.eyebrow{display:flex;align-items:center;justify-content:center;gap:14px;margin:6px 0 12px;font-family:var(--f-sub);font-weight:700;font-size:14px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
+.eyebrow::before,.eyebrow::after{content:"";width:36px;height:1px;background:linear-gradient(90deg,transparent,#95805e)}
+.eyebrow::after{transform:scaleX(-1)}
+h1{margin:0 0 14px;font-family:var(--f-title);font-weight:400;font-size:clamp(32px,6vw,62px);line-height:1.1;letter-spacing:.01em;color:var(--ink);text-wrap:balance;text-shadow:0 3px 26px rgba(0,0,0,.6),0 0 38px rgba(160,61,40,.18)}
+.lede{max-width:600px;margin:0 auto;color:var(--muted);font-size:19px;font-style:italic}
+
+/* ============ PANELS (esquinas achaflanadas con doble borde) ============ */
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:18px}
+.panel{position:relative;padding:1px;background:var(--line);
+  clip-path:polygon(0 var(--c),var(--c) 0,calc(100% - var(--c)) 0,100% var(--c),100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,var(--c) 100%,0 calc(100% - var(--c)))}
+.panel-in{position:relative;height:100%;padding:22px 18px 20px;
+  background:radial-gradient(ellipse at 12% 0,rgba(255,244,217,.04),transparent 55%),linear-gradient(155deg,#26221f 0%,#1a1816 58%,#141210 100%);
+  clip-path:polygon(0 calc(var(--c) - 1px),calc(var(--c) - 1px) 0,calc(100% - var(--c) + 1px) 0,100% calc(var(--c) - 1px),100% calc(100% - var(--c) + 1px),calc(100% - var(--c) + 1px) 100%,calc(var(--c) - 1px) 100%,0 calc(100% - var(--c) + 1px))}
+.panel-in::after{content:"";position:absolute;inset:7px;border:1px solid rgba(157,131,92,.12);pointer-events:none;
+  clip-path:polygon(0 8px,8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px))}
+.result-panel{background:#7a5c38}
+.result-panel .panel-in{background:radial-gradient(ellipse 70% 30% at 50% 2%,rgba(130,66,38,.16),transparent 90%),linear-gradient(155deg,#29231e,#1b1816 60%,#141210)}
+.panel-head{display:flex;align-items:center;gap:12px;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid #484036}
+.panel-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;border:1px solid #66533c;background:linear-gradient(145deg,#3c3328,#211d18);color:var(--gold);transform:rotate(45deg)}
+.panel-icon .ic{transform:rotate(-45deg);width:20px;height:20px}
+.kicker{display:block;margin-bottom:2px;font-family:var(--f-sub);font-weight:700;font-size:13.5px;letter-spacing:.24em;text-transform:uppercase;color:#ab8a5e}
+h2{margin:0;font-family:var(--f-sub);font-weight:700;font-size:26px;line-height:1.1;color:var(--ink)}
+.stamp{margin-left:auto;flex:none;padding:5px 9px;border:1px solid #755a3d;background:#221a14;color:#d3b483;font-family:var(--f-sub);font-weight:700;font-size:13.5px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.intro{margin:0 0 16px;color:var(--muted);font-size:16.5px;line-height:1.5}
+
+.seg{display:flex;gap:3px;padding:3px;margin-bottom:16px;background:var(--input);border:1px solid #524533}
+.seg button{flex:1;min-height:40px;padding:2px 8px;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:16px;letter-spacing:.03em;line-height:1.1;transition:background .2s,color .2s}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:linear-gradient(#e8cc93,#ae8c58);color:#1b130d}
+
+.fields{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.field[hidden]{display:none}
+.field-top{margin-bottom:6px}
+.field label{font-weight:600;font-size:16.5px;line-height:1.25;color:#eadcc0}
+.unit{flex:none;padding:0 12px 0 4px;pointer-events:none;font-family:var(--f-sub);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#94836c;white-space:nowrap}
+.wrap{display:flex;align-items:center;position:relative;background:linear-gradient(180deg,#0e0c0a,#171512);border:1px solid #534735;box-shadow:inset 0 3px 8px rgba(0,0,0,.45);transition:border-color .2s,box-shadow .2s}
+.wrap::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;background:#b19a6c;opacity:.6}
+.wrap:focus-within{border-color:#b59a69;box-shadow:inset 0 2px 7px #050403,0 0 0 3px rgba(198,159,95,.14)}
+.wrap.bad{border-color:#cb675a;box-shadow:inset 0 2px 7px #050403,0 0 0 3px rgba(203,103,90,.12)}
+.num{width:100%;min-width:0;height:54px;padding:0 15px;border:0;outline:0;background:transparent;font-family:var(--f-sub);font-weight:700;font-size:26px;color:#f7e9cb;font-variant-numeric:lining-nums tabular-nums}
+.num::placeholder{color:#5e5145}
+.hint{margin:5px 0 0;color:var(--dim);font-size:14.5px;line-height:1.35}
+.err{margin:4px 0 0;color:var(--bad);font-size:14.5px;line-height:1.3}
+.err:empty{display:none}
+.tools{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #423a30}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border:1px solid #69563a;background:#2a241d;color:#d6bf99;font-weight:600;font-size:15.5px;letter-spacing:.03em;transition:background .2s,border-color .2s,color .2s}
+.btn:hover{border-color:#c2a370;color:#f9e4bd;background:#352d23}
+.live{display:flex;align-items:center;gap:7px;color:#a3947d;font-size:14px;letter-spacing:.04em}
+.live i{width:7px;height:7px;border-radius:50%;background:#b99b5f;box-shadow:0 0 8px #b99b5f;animation:blink 2.4s ease-in-out infinite}
+@keyframes blink{50%{opacity:.35}}
+
+/* ============ RESULTADOS ============ */
+.reduction{text-align:center;padding:6px 0 0}
+.r-label{margin:0 0 6px;font-family:var(--f-sub);font-weight:700;font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:#bba78c}
+.r-value{display:flex;justify-content:center;align-items:baseline;gap:4px;color:#ecd199;line-height:1;text-shadow:0 3px 16px #000,0 0 30px rgba(207,178,122,.12)}
+.r-value strong{font-family:var(--f-sub);font-weight:700;font-size:clamp(60px,11vw,88px);font-variant-numeric:lining-nums tabular-nums;letter-spacing:-.03em}
+.r-value span{font-family:var(--f-sub);font-weight:700;font-size:34px}
+.r-cap{display:block;margin-top:6px;color:#b4a287;font-size:15.5px;font-style:italic}
+.meter{margin:20px 0 6px}
+.m-track{position:relative;height:15px;padding:2px;background:#0b0a09;border:1px solid #665239;box-shadow:inset 0 3px 6px #000}
+.m-in{display:flex;height:100%;overflow:hidden}
+.m-a{width:0;background:linear-gradient(90deg,#6b5939,#c9a96f);box-shadow:inset 0 1px #e0cda8;transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.m-b{width:0;background:linear-gradient(90deg,#762922,#bd5645);box-shadow:inset 0 1px #e29a85;transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.m-cap{position:absolute;top:-4px;bottom:-4px;left:calc(2px + (100% - 4px) * .9);width:0;border-left:1px dashed rgba(240,215,158,.7)}
+.m-scale{display:flex;justify-content:space-between;margin-top:6px;color:#8f826f;font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:7px;color:#bdb09a;font-size:15px}
+.legend b{width:10px;height:10px;display:inline-block;background:#c9a96f}
+.legend .k2{background:#b44a3b}
+.totals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.card{min-width:0;padding:13px 12px 11px;background:linear-gradient(#191714,#12100e);border:1px solid #554536;box-shadow:inset 0 1px rgba(255,255,255,.04)}
+.card .c-label{display:block;min-height:34px;font-family:var(--f-sub);font-weight:700;font-size:14px;letter-spacing:.13em;line-height:1.25;text-transform:uppercase;color:#b9a487}
+.c-val{display:block;margin:4px 0 2px;font-family:var(--f-sub);font-weight:700;font-size:clamp(25px,4.2vw,36px);line-height:1.1;color:#f2e7d1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:lining-nums tabular-nums}
+.card.danger .c-val{color:#eba698}
+.card.ehp .c-val{color:#e6cc96}
+.card.max .c-val{color:#f3dba3}
+.c-sub{display:block;color:#948576;font-size:14px;line-height:1.3}
+.need{margin-top:14px;padding:12px 14px;border:1px solid #4a3d30;background:rgba(18,15,12,.7)}
+.need-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.need h3{margin:0;font-family:var(--f-sub);font-weight:700;font-size:17px;letter-spacing:.06em;text-transform:uppercase;color:#d6bc93}
+.need b{font-family:var(--f-sub);font-size:24px;color:#f0d79e;font-variant-numeric:lining-nums tabular-nums}
+.need p{margin:2px 0 8px;color:#a89c88;font-size:15px}
+.n-track{height:4px;background:#12100e}.n-track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#725d3c,#d6b57d);transition:width .45s}
+.breakdown{margin-top:16px;padding-top:12px;border-top:1px solid #4a3d30}
+.breakdown h3{margin:0 0 4px;font-family:var(--f-sub);font-weight:700;font-size:19px;color:#d6bc93}
+.b-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed #40372d;font-size:16px;color:#a99c87}
+.b-row:last-child{border-bottom:0}
+.b-row strong{font-family:var(--f-sub);font-weight:700;font-size:19px;color:#e8d4b2;white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.alert{min-height:20px;margin:8px 0 0;color:#e8b09b;font-size:15.5px;line-height:1.35}
+.note{margin:10px 0 0;padding-left:11px;border-left:2px solid #856c46;color:#aea18e;font-size:15px;line-height:1.5}
+
+/* ============ GRÁFICA ============ */
+.chart-wrap{margin-top:20px}
+.c-head{text-align:center;margin-bottom:6px}
+.c-head h2{font-size:27px}
+.c-head p{max-width:650px;margin:6px auto 0;color:var(--muted);font-size:17.5px}
+.chart{position:relative;margin-top:8px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .ov{touch-action:pan-y;cursor:crosshair}
+.axis text{fill:#9a8c76;font-family:var(--f-body);font-size:11.5px}
+.axis .grid{stroke:#2f2922;stroke-width:1}
+.axis .zero{stroke:#4a4034}
+.curve{fill:none;stroke:#e1c185;stroke-width:2.4;stroke-linejoin:round}
+.area{fill:url(#cg)}
+.capln{stroke:#c9604f;stroke-width:1;stroke-dasharray:4 4;opacity:.8}
+.cap-t{fill:#d98b7b;font-size:11.5px}
+.mk{fill:#f3dba3;stroke:#1b130d;stroke-width:2}
+.mk-line{stroke:rgba(240,215,158,.4);stroke-dasharray:3 4}
+.ghost{fill:#8a7a5a;stroke:#1b130d;stroke-width:1.5}
+.hov-line{stroke:rgba(240,215,158,.55)}
+.hov-dot{fill:#fff3d6;stroke:#a73f35;stroke-width:2}
+.tip{position:absolute;top:0;left:0;z-index:2;max-width:260px;padding:7px 10px;border:1px solid #755a3d;background:rgba(20,15,11,.94);color:#ecd9b6;font-size:15px;line-height:1.3;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap}
+.tip b{font-family:var(--f-sub);font-size:18px;color:#f3dba3}
+.tip.on{opacity:1}
+.c-axis-title{text-align:center;margin-top:2px;color:#8f826f;font-size:14.5px;letter-spacing:.04em}
+.scales{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:14px}
+.scale{min-width:0;padding:13px 8px 11px;text-align:center;background:linear-gradient(#211e1b,#171512);border:1px solid #4b4033}
+.scale.on{border-color:#ad8451;background:linear-gradient(#332a21,#1f1a16);box-shadow:0 0 0 1px #5d4530}
+.s-tag{margin-bottom:4px;font-family:var(--f-sub);font-weight:700;font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:#ac9673;line-height:1.25}
+.s-val{font-family:var(--f-sub);font-weight:700;font-size:clamp(25px,4.6vw,38px);line-height:1.1;color:#e8cd9c;font-variant-numeric:lining-nums tabular-nums}
+.s-desc{margin-top:4px;color:#988b79;font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.s-bar{height:3px;margin-top:9px;background:#12100e}.s-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#725d3c,#d2b179);transition:width .45s}
+.formula{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;margin-top:14px;padding:12px 15px;border:1px solid #3c342a;background:#14110e}
+.formula span{font-family:var(--f-sub);font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:#9d8e76}
+.formula code{font-family:Consolas,Menlo,monospace;font-size:14px;color:#d3bb90;overflow-wrap:anywhere}
+
+/* ============ KO-FI ============ */
+.support{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;margin-top:28px;padding:24px 20px;border:1px solid #645139;background:radial-gradient(circle at 10% 0%,rgba(164,65,39,.14),transparent 46%),linear-gradient(135deg,#221d18,#151311);box-shadow:inset 0 1px rgba(255,230,191,.07)}
+.cup{flex:none;width:52px;height:52px;display:grid;place-items:center;border-radius:50%;color:#e0bf89;background:#38281e;border:1px solid #886943;box-shadow:0 0 0 4px #1b1612}
+.cup svg{width:28px;height:28px;overflow:visible}
+.steam{animation:steam 2.8s ease-in-out infinite}.steam.b{animation-delay:-1.4s}
+@keyframes steam{0%{opacity:0;transform:translateY(2px)}40%{opacity:.9}100%{opacity:0;transform:translateY(-4px)}}
+.support h2{font-size:27px;color:#efd9b6;margin-bottom:4px}
+.support p{margin:0;max-width:470px;color:#aa9d89;font-size:17px}
+.coffee{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;color:#21140f;background:linear-gradient(#ebca95,#b98c54);border:1px solid #e4c18a;font-weight:600;font-size:17.5px;letter-spacing:.04em;text-decoration:none;box-shadow:inset 0 1px rgba(255,255,255,.27),0 6px 18px #0009;transition:transform .2s,filter .2s}
+.coffee::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;transform:skewX(-20deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transition:left .6s}
+.coffee:hover{transform:translateY(-2px);filter:brightness(1.07)}.coffee:hover::after{left:130%}
+.coffee .ic{width:20px;height:20px;fill:currentColor;stroke:none}
+.foot{padding-top:22px;text-align:center;color:#7e7366;font-size:14px;line-height:1.55}
+.foot a{color:#b79f78;text-underline-offset:3px}
+.foot b{color:#bba481;font-weight:500;letter-spacing:.04em}
+.fatal{margin-top:15px;color:#f4a99b;text-align:center}
+
+/* ============ RESPONSIVE ============ */
+@media (min-width:560px){
+  .panel-in{padding:26px 26px 24px}
+  .fields.two{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px}
+  .support{flex-direction:row;text-align:left}
+  .support .s-copy{flex:1}
+}
+@media (min-width:900px){
+  .layout{grid-template-columns:minmax(0,.94fr) minmax(0,1.06fr);align-items:start;gap:20px}
+  .layout>.panel:first-child{position:sticky;top:14px}
+  .panel-in{padding:30px 30px 26px}
+  .fields.two{grid-template-columns:1fr}
+  .topbar{min-height:84px}
+}
+@media (min-width:1080px){.fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.s-copy{display:flex;align-items:center;gap:16px;flex-direction:column}
+@media (min-width:560px){.s-copy{flex-direction:row}}
+@media (max-width:480px){
+  body{font-size:16.5px}
+  .page{width:calc(100% - 24px)}
+  .brand-name{font-size:16px;letter-spacing:.07em}
+  .brand-detail{font-size:11px;letter-spacing:.2em}
+  .brand-symbol{width:28px;height:34px}
+  .lede{font-size:17.5px}
+  .eyebrow{font-size:12.5px;letter-spacing:.22em;gap:10px}.eyebrow::before,.eyebrow::after{width:20px}
+  h2{font-size:23px}
+  .totals{gap:8px}.card{padding:11px 9px 9px}.card .c-label{font-size:12.5px;letter-spacing:.09em}
+  .stamp{font-size:12px;padding:4px 7px}
+  .scales{gap:6px}.scale{padding:11px 5px 9px}.s-tag{font-size:11.5px;letter-spacing:.07em}
+  .btns{width:100%}.btns .btn{flex:1;justify-content:center;padding:0 8px}
+  .live{width:100%}
+  .coffee{width:100%}
+}
+@media (max-width:400px){.stamp{display:none}}
+@media (max-width:340px){.brand-detail{display:none}.totals{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.emblem .slash,.emblem .spark,.emblem .ripple{opacity:0}}
+</style>
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 19.5 6v6.5c0 4.4-3 7-7.5 9-4.5-2-7.5-4.6-7.5-9V6z"/><path d="M12 7l-3.2 5.6L12 17l3.2-4.4z"/></symbol>
+    <symbol id="i-sword" viewBox="0 0 24 24"><path d="M4 20h16M12 2v15M7.5 7.5 12 2.5l4.5 5M7.5 12h9M9.5 16h5"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.2 12a7.8 7.8 0 1 0 2.4-5.6M4.2 3.8v4.6h4.6"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3A4 4 0 0 0 13 5.3l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H17a2 2 0 0 1 2 2v1h1a4 4 0 1 1 0 8h-1v1a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6V5.5Zm17 3V12h1a1.75 1.75 0 0 0 0-3.5h-1Zm-8 7 4.4-4.05a2.55 2.55 0 0 0-3.6-3.6l-.8.8-.8-.8a2.55 2.55 0 0 0-3.6 3.6L11 15.5Z"/></symbol>
+  </defs>
+</svg>
+<div class="dust" id="dust" aria-hidden="true"></div>
+
+<main class="page">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-symbol" viewBox="0 0 36 43" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M18 2 32 9v17L18 40 4 26V9Z"/><path d="M18 6 28 12v12L18 35 8 24V12Z" opacity=".45"/><path d="M18 9 23 17l-5 12-5-12z" fill="currentColor" fill-opacity=".2"/><path d="M18 2v7M18 29v11M8 18h6m8 0h6"/></svg>
+      <div><span class="brand-name">Exile's Workshop</span><span class="brand-detail" data-i18n="brandDetail">Path of Exile 2 tools</span></div>
+    </div>
+    <div class="langs" role="group" aria-label="Language / Idioma">
+      <button type="button" id="lang-en" lang="en" aria-pressed="true">EN</button>
+      <button type="button" id="lang-es" lang="es" aria-pressed="false">ES</button>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="title">
+    <svg class="emblem" viewBox="0 0 240 190" role="img" aria-label="A blade striking an armoured shield">
+      <defs>
+        <radialGradient id="eg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#e0705c" stop-opacity=".55"/><stop offset=".55" stop-color="#a73f35" stop-opacity=".2"/><stop offset="1" stop-color="#a73f35" stop-opacity="0"/></radialGradient>
+        <linearGradient id="sh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a4a35"/><stop offset=".5" stop-color="#2d251d"/><stop offset="1" stop-color="#1a1511"/></linearGradient>
+        <linearGradient id="gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0d79e"/><stop offset="1" stop-color="#8a6f44"/></linearGradient>
+      </defs>
+      <circle class="glow" cx="120" cy="96" r="90" fill="url(#eg)"/>
+      <g class="ring" fill="none" stroke="#cfb27a">
+        <circle cx="120" cy="96" r="84" stroke-opacity=".5" stroke-width="1"/>
+        <circle cx="120" cy="96" r="78" stroke-opacity=".5" stroke-width="3" stroke-dasharray="1.2 11.3"/>
+        <path d="M120 8l4 4-4 4-4-4zM120 176l4 4-4 4-4-4zM32 92l4 4-4 4-4-4zM208 92l4 4-4 4-4-4z" fill="#cfb27a" stroke="none" opacity=".85"/>
+      </g>
+      <g class="body">
+        <path d="M120 26 174 44v50c0 32-24 54-54 70-30-16-54-38-54-70V44z" fill="url(#sh)" stroke="url(#gd)" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M120 36 164 51v43c0 26-19 45-44 58-25-13-44-32-44-58V51z" fill="none" stroke="#cfb27a" stroke-opacity=".4" stroke-width="1"/>
+        <path d="M120 36v116M76 74h88M82 104h76" stroke="#cfb27a" stroke-opacity=".28" stroke-width="1"/>
+        <path d="M120 66l14 22-14 26-14-26z" fill="#a73f35" stroke="#f0d79e" stroke-width="1.4"/>
+        <circle cx="120" cy="88" r="3" fill="#ffd9a0"/>
+      </g>
+      <circle class="ripple" cx="92" cy="72" r="16" fill="none" stroke="#ffd9a0" stroke-width="1.6"/>
+      <path class="slash" d="M22 20 92 72" stroke="#fff3d6" stroke-width="3.2" stroke-linecap="round"/>
+      <g class="spark" stroke="#ffd9a0" stroke-width="2" stroke-linecap="round"><path d="M92 58v-10M92 86v10M78 72H66M106 72h12M82 62l-7-7M102 82l7 7M102 62l7-7M82 82l-7 7"/></g>
+    </svg>
+    <p class="eyebrow" data-i18n="eyebrow">A test of survival</p>
+    <h1 id="title" data-i18n="title">Armour &amp; EHP Calculator</h1>
+    <p class="lede" data-i18n="subtitle">In Wraeclast, a heavier blow pierces more armour. Discover exactly how much damage you endure.</p>
+  </section>
+
+  <div class="layout">
+    <section class="panel" aria-labelledby="in-h"><div class="panel-in">
+      <div class="panel-head">
+        <span class="panel-icon" aria-hidden="true"><svg class="ic"><use href="#i-shield"/></svg></span>
+        <div><span class="kicker" data-i18n="inKicker">The defender</span><h2 id="in-h" data-i18n="inHeading">Configure Your Defences</h2></div>
+      </div>
+      <div class="seg" role="group" id="typeSeg" data-i18n-aria="typeAria" aria-label="Hit type">
+        <button type="button" data-type="phys" aria-pressed="true" data-i18n="typePhys">Physical hit</button>
+        <button type="button" data-type="ele" aria-pressed="false" data-i18n="typeEle">Elemental hit</button>
+      </div>
+      <p class="intro" id="intro"></p>
+      <div class="fields two" id="fields"></div>
+      <div class="tools">
+        <div class="btns">
+          <button class="btn" id="reset" type="button"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg><span data-i18n="reset">Reset</span></button>
+          <button class="btn" id="copy" type="button"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg><span id="copyLabel" data-i18n="copy">Copy link</span></button>
+        </div>
+        <span class="live"><i aria-hidden="true"></i><span data-i18n="live">Live calculation</span></span>
+      </div>
+    </div></section>
+
+    <section class="panel result-panel" aria-labelledby="out-h"><div class="panel-in">
+      <div class="panel-head">
+        <span class="panel-icon" aria-hidden="true"><svg class="ic"><use href="#i-sword"/></svg></span>
+        <div><span class="kicker" data-i18n="outKicker">The outcome</span><h2 id="out-h" data-i18n="outHeading">Your Survival</h2></div>
+        <span class="stamp" data-i18n="capStamp">90% cap</span>
+      </div>
+      <div class="reduction">
+        <p class="r-label" id="rLabel"></p>
+        <div class="r-value" aria-live="polite" aria-atomic="true"><strong id="rVal">—</strong><span>%</span></div>
+        <span class="r-cap" id="rCap"></span>
+      </div>
+      <div class="meter">
+        <div class="m-track" id="mTrack" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="m-in"><div class="m-a" id="mA"></div><div class="m-b" id="mB"></div></div><div class="m-cap" id="mCap"></div></div>
+        <div class="m-scale"><span>0%</span><span>50%</span><span>100%</span></div>
+        <div class="legend"><span><b aria-hidden="true"></b><span data-i18n="lgArmour">Armour</span></span><span><b class="k2" aria-hidden="true"></b><span id="lgSecond"></span></span></div>
+      </div>
+      <div class="totals">
+        <div class="card danger"><span class="c-label" data-i18n="cDamage">Damage taken</span><strong class="c-val" id="vDamage">—</strong><span class="c-sub" data-i18n="cDamageSub">From this exact hit</span></div>
+        <div class="card ehp"><span class="c-label" data-i18n="cEhp">EHP at this hit size</span><strong class="c-val" id="vEhp">—</strong><span class="c-sub" data-i18n="cEhpSub">Life + ES ÷ what gets through</span></div>
+        <div class="card max"><span class="c-label" data-i18n="cMax">Max survivable hit</span><strong class="c-val" id="vMax">—</strong><span class="c-sub" data-i18n="cMaxSub">Biggest raw hit that does not kill you</span></div>
+        <div class="card"><span class="c-label" data-i18n="cHits">Hits to die</span><strong class="c-val" id="vHits">—</strong><span class="c-sub" data-i18n="cHitsSub">Hits of this size to empty your pool</span></div>
+      </div>
+      <div class="need">
+        <div class="need-top"><h3 id="needTitle"></h3><b id="needVal">—</b></div>
+        <p id="needSub"></p>
+        <div class="n-track"><i id="needBar"></i></div>
+      </div>
+      <div class="breakdown">
+        <h3 data-i18n="bdHeading">Mitigation Breakdown</h3>
+        <div class="b-row"><span data-i18n="bdArmour">Reduction from armour</span><strong id="bdA">—</strong></div>
+        <div class="b-row"><span id="bdSecondL"></span><strong id="bdB">—</strong></div>
+        <div class="b-row"><span data-i18n="bdThrough">Damage passing through</span><strong id="bdC">—</strong></div>
+      </div>
+      <p class="alert" id="alert" role="status"></p>
+      <p class="note" id="ehpNote"></p>
+    </div></section>
+  </div>
+
+  <section class="chart-wrap" aria-labelledby="ch-h">
+    <div class="panel"><div class="panel-in">
+      <div class="c-head"><h2 id="ch-h" data-i18n="chHeading">A Heavier Blow Breaks Through</h2><p data-i18n="chLead">Same defences, different hit sizes. Drag across the curve to read your reduction at any hit.</p></div>
+      <div class="chart" id="chart">
+        <svg viewBox="0 0 640 262" id="chartSvg" role="img">
+          <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfb27a" stop-opacity=".34"/><stop offset="1" stop-color="#cfb27a" stop-opacity="0"/></linearGradient></defs>
+          <g class="axis" id="axis"></g>
+          <path class="area" id="area" d=""/>
+          <line class="capln" id="capLine" x1="48" x2="628"/>
+          <text class="cap-t" id="capText" x="626" text-anchor="end"></text>
+          <path class="curve" id="curve" d=""/>
+          <line class="mk-line" id="mkLine" y1="14" y2="214"/>
+          <circle class="ghost" id="gLo" r="4.5"/><circle class="ghost" id="gHi" r="4.5"/>
+          <circle class="mk" id="mk" r="6.5"/>
+          <line class="hov-line" id="hovLine" y1="14" y2="214" visibility="hidden"/>
+          <circle class="hov-dot" id="hovDot" r="5" visibility="hidden"/>
+          <rect class="ov" id="ov" x="48" y="14" width="580" height="200" fill="transparent"/>
+        </svg>
+        <div class="tip" id="tip" role="status"></div>
+      </div>
+      <p class="c-axis-title" data-i18n="chX">Raw hit size (log scale) → reduction %</p>
+      <div class="scales">
+        <div class="scale"><div class="s-tag" data-i18n="smallHit">Half-sized hit</div><div class="s-val" id="s1">—</div><div class="s-desc" id="s1d">—</div><div class="s-bar"><i id="s1b"></i></div></div>
+        <div class="scale on"><div class="s-tag" data-i18n="selHit">Your selected hit</div><div class="s-val" id="s2">—</div><div class="s-desc" id="s2d">—</div><div class="s-bar"><i id="s2b"></i></div></div>
+        <div class="scale"><div class="s-tag" data-i18n="largeHit">Double-sized hit</div><div class="s-val" id="s3">—</div><div class="s-desc" id="s3d">—</div><div class="s-bar"><i id="s3b"></i></div></div>
+      </div>
+      <div class="formula"><span data-i18n="fTitle">The armour formula</span><code id="fCode"></code></div>
+    </div></div>
+  </section>
+
+  <aside class="support" aria-labelledby="s-h">
+    <div class="s-copy">
+      <div class="cup" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 11h2a3 3 0 0 1 0 6h-2M3 22h17"/><path class="steam" d="M8.5 3.5c-1.6 1.3 1.6 2.2 0 3.5"/><path class="steam b" d="M13 3.5c-1.6 1.3 1.6 2.2 0 3.5"/></svg></div>
+      <div><h2 id="s-h" data-i18n="sTitle">Keep the Forge Burning</h2><p data-i18n="sText">Found this tool helpful on your journey through Wraeclast? Help me keep building free tools for the community.</p></div>
+    </div>
+    <a class="coffee" id="coffee" href="https://ko-fi.com/titixmixgames" target="_blank" rel="noopener noreferrer"><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg><span data-i18n="coffee">Buy me a coffee</span></a>
+  </aside>
+
+  <footer class="foot">
+    <div id="disclaimer"></div>
+    <div style="margin-top:6px"><b>EXILE'S WORKSHOP</b> · <span data-i18n="fan">Unofficial fan-made calculator · Not affiliated with Grinding Gear Games</span></div>
+  </footer>
+  <noscript><p class="fatal">JavaScript is required to calculate. / Se necesita JavaScript para calcular.</p></noscript>
+</main>
+
+<script>
+(() => {
+'use strict';
+const NS = 'http://www.w3.org/2000/svg';
+
+/* =============== 1. MODELO (puro) ===============
+   Reducción por armadura contra un golpe:  DR = Armadura / (Armadura + K × golpe),  con K = 10.
+   Máximo 90 %. La reducción física adicional (cargas de aguante, etc.) se SUMA a la de armadura
+   y el total se limita al 90 %.  Contra golpes elementales (parche 0.3) solo cuenta un % de la
+   armadura, la reducción se calcula antes de las resistencias y la reducción física adicional no aplica. */
+const K = 10, CAP = 0.9;
+
+function makeModel(v, type) {
+  const ele = type === 'ele';
+  const Ae = ele ? v.armor * v.armEle / 100 : v.armor;     // armadura efectiva contra este tipo de golpe
+  const e = ele ? 0 : v.additional / 100;                  // reducción adicional
+  const f = ele ? 1 - v.res / 100 : 1;                     // factor de resistencia
+  const at = (D) => {
+    const base = D > 0 ? Math.min(CAP, Ae / (Ae + K * D)) : 0;
+    const tot = Math.min(CAP, Math.max(0, base + e));
+    const taken = D * (1 - tot) * f;
+    return { base, tot, taken, mit: D > 0 ? 1 - (1 - tot) * f : 0 };
+  };
+  return { ele, Ae, e, f, at };
+}
+/** Mayor golpe bruto D tal que el daño recibido <= vida. taken(D) crece de forma monótona -> bisección. */
+function maxHit(m, H) {
+  if (!(H > 0)) return 0;
+  let lo = 0, hi = 10 * H / Math.max(m.f, 1e-9);           // taken(D) >= 0.1·D·f  =>  taken(hi) >= H
+  for (let i = 0; i < 120; i++) { const mid = (lo + hi) / 2; if (m.at(mid).taken < H) lo = mid; else hi = mid; }
+  return lo;
+}
+/** Armadura (real, no efectiva) necesaria para llegar al límite del 90 % con este golpe. */
+function armourForCap(m, D, armEle) {
+  const b = CAP - m.e;                                     // parte que debe aportar la armadura
+  if (b <= 0) return 0;
+  const needEff = K * D * b / (1 - b);
+  if (m.ele) return armEle > 0 ? needEff / (armEle / 100) : Infinity;
+  return needEff;
+}
+
+/* =============== 2. TEXTOS =============== */
+const I18N = {
+  en: {
+    docTitle: 'PoE 2 Armour & EHP Calculator – Physical Damage Reduction',
+    brandDetail: 'Path of Exile 2 tools', eyebrow: 'A test of survival', title: 'Armour & EHP Calculator',
+    subtitle: 'In Wraeclast, a heavier blow pierces more armour. Discover exactly how much damage you endure.',
+    inKicker: 'The defender', inHeading: 'Configure Your Defences', typeAria: 'Hit type', typePhys: 'Physical hit', typeEle: 'Elemental hit',
+    introP: 'Enter the raw physical hit and your defensive stats. Results update as you type.',
+    introE: 'Elemental hits only use the share of your armour that applies to them (patch 0.3), then resistances.',
+    fIncomingP: 'Incoming physical damage', fIncomingE: 'Incoming elemental damage', uHit: 'Raw hit', hIncoming: 'Hit size before any mitigation.',
+    fArmor: 'Total armour', uArmour: 'Armour', hArmor: 'All armour after applicable bonuses.',
+    fAdditional: 'Additional physical reduction', uPercent: 'Percent %', hAdditional: 'Adds to the armour reduction, e.g. endurance charges. Total is capped at 90%.',
+    fArmEle: 'Armour applied to elemental', uOfArmour: '% of armour', hArmEle: 'Share of your armour that also works against elemental hits (e.g. +100% from some items).',
+    fRes: 'Elemental resistance', uRes: 'Resist %', hRes: 'Applied after armour. Can be negative.',
+    fHealth: 'Total health pool', uHealth: 'Life + ES', hHealth: 'Combined Life and Energy Shield.',
+    reset: 'Reset', copy: 'Copy link', copied: 'Link copied', copyFail: 'Copy failed', live: 'Live calculation',
+    outKicker: 'The outcome', outHeading: 'Your Survival', capStamp: '90% cap',
+    rLabelP: 'Actual physical damage reduction', rLabelE: 'Total mitigation against this hit',
+    rCap: 'For your specified incoming hit', rCapped: 'Maximum reduction reached',
+    lgArmour: 'Armour', lgAdd: 'Additional reduction', lgRes: 'Resistance',
+    cDamage: 'Damage taken', cDamageSub: 'From this exact hit', cEhp: 'EHP at this hit size', cEhpSub: 'Life + ES ÷ what gets through',
+    cMax: 'Max survivable hit', cMaxSub: 'Biggest raw hit that does not kill you', cHits: 'Hits to die', cHitsSub: 'Hits of this size to empty your pool',
+    needTitle: 'Armour for the 90% cap', needNone: 'No armour applies to elemental hits.', needDone: 'Cap reached. Extra armour adds nothing at this hit size.',
+    needSub: (p, n) => `You have ${p}% of the ${n} armour needed at this hit size.`,
+    bdHeading: 'Mitigation Breakdown', bdArmour: 'Reduction from armour', bdAdd: 'Additional flat reduction', bdRes: 'Elemental resistance', bdThrough: 'Damage passing through',
+    noteP: 'EHP at this hit size = (Life + ES) ÷ what gets through. It changes with hit size, so the exact biggest hit you survive is shown separately.',
+    noteE: 'Armour against elemental hits is applied before resistances. EHP changes with hit size, so the exact biggest hit you survive is shown separately.',
+    invalidSummary: 'Fix the highlighted inputs to see your result.', noHit: 'Enter an incoming hit greater than zero to see meaningful mitigation.',
+    errReq: 'Required', errRange: (a, b) => `Enter a number from ${a} to ${b}`,
+    chHeading: 'A Heavier Blow Breaks Through', chLead: 'Same defences, different hit sizes. Drag across the curve to read your reduction at any hit.',
+    chX: 'Raw hit size (log scale) → reduction %', smallHit: 'Half-sized hit', selHit: 'Your selected hit', largeHit: 'Double-sized hit',
+    hitSize: 'Raw hit', capLine: '90% cap', tipHit: 'Hit', tipRed: 'reduction', tipTaken: 'you take',
+    chartAria: (r, h) => `Reduction curve. At your hit of ${h} the reduction is ${r}%.`,
+    fTitle: 'The armour formula', fCodeP: 'Armour ÷ (Armour + 10 × Incoming hit)',
+    fCodeE: 'Armour × applied% ÷ (Armour × applied% + 10 × Incoming hit), then × (1 − resistance)',
+    sTitle: 'Keep the Forge Burning', sText: 'Found this tool helpful on your journey through Wraeclast? Help me keep building free tools for the community.',
+    coffee: 'Buy me a coffee', coffeeAria: 'Buy me a coffee on Ko-fi (opens in a new tab)',
+    disclaimer: 'Simplified model of a single hit: formula and 90% cap per <a href="https://mobalytics.gg/poe-2/guides/armour" target="_blank" rel="noopener noreferrer">Mobalytics</a> and the <a href="https://mobalytics.gg/poe-2/guides/damage-defence-calc-order" target="_blank" rel="noopener noreferrer">damage order guide</a>. Excludes armour break, bypass, recovery and other modifiers. Patch changes may alter the constant; check the game.',
+    fan: 'Unofficial fan-made calculator · Not affiliated with Grinding Gear Games'
+  },
+  es: {
+    docTitle: 'Calculadora de Armadura y EHP de PoE 2 – Reducción de daño físico',
+    brandDetail: 'Herramientas de Path of Exile 2', eyebrow: 'Una prueba de supervivencia', title: 'Calculadora de Armadura y EHP',
+    subtitle: 'En Wraeclast, cuanto más fuerte es el golpe, más armadura atraviesa. Descubre cuánto daño recibes realmente.',
+    inKicker: 'El defensor', inHeading: 'Configura tus Defensas', typeAria: 'Tipo de golpe', typePhys: 'Golpe físico', typeEle: 'Golpe elemental',
+    introP: 'Introduce el golpe físico bruto y tus estadísticas defensivas. Los resultados se actualizan al instante.',
+    introE: 'Los golpes elementales solo usan la parte de tu armadura que les afecta (parche 0.3) y después las resistencias.',
+    fIncomingP: 'Daño físico entrante', fIncomingE: 'Daño elemental entrante', uHit: 'Golpe bruto', hIncoming: 'Tamaño del golpe antes de mitigarlo.',
+    fArmor: 'Armadura total', uArmour: 'Armadura', hArmor: 'Toda la armadura tras aplicar bonificaciones.',
+    fAdditional: 'Reducción física adicional', uPercent: 'Porcentaje %', hAdditional: 'Se suma a la de la armadura, p. ej. cargas de aguante. El total tiene un límite del 90 %.',
+    fArmEle: 'Armadura aplicada a elemental', uOfArmour: '% de armadura', hArmEle: 'Parte de tu armadura que también funciona contra golpes elementales (p. ej. +100 % en algunos objetos).',
+    fRes: 'Resistencia elemental', uRes: 'Resist. %', hRes: 'Se aplica después de la armadura. Puede ser negativa.',
+    fHealth: 'Reserva de vida total', uHealth: 'Vida + ES', hHealth: 'Suma de vida y escudo de energía.',
+    reset: 'Restablecer', copy: 'Copiar enlace', copied: 'Enlace copiado', copyFail: 'No se pudo copiar', live: 'Cálculo en directo',
+    outKicker: 'El resultado', outHeading: 'Tu Supervivencia', capStamp: 'Límite 90 %',
+    rLabelP: 'Reducción real de daño físico', rLabelE: 'Mitigación total contra este golpe',
+    rCap: 'Para el golpe entrante indicado', rCapped: 'Se alcanzó la reducción máxima',
+    lgArmour: 'Armadura', lgAdd: 'Reducción adicional', lgRes: 'Resistencia',
+    cDamage: 'Daño recibido', cDamageSub: 'De este golpe concreto', cEhp: 'EHP con este golpe', cEhpSub: 'Vida + ES ÷ lo que pasa',
+    cMax: 'Golpe máximo sobrevivible', cMaxSub: 'El mayor golpe bruto que no te mata', cHits: 'Golpes para morir', cHitsSub: 'Golpes de este tamaño para vaciar tu reserva',
+    needTitle: 'Armadura para el límite del 90 %', needNone: 'Ninguna armadura se aplica a golpes elementales.', needDone: 'Límite alcanzado. Más armadura no aporta nada con este golpe.',
+    needSub: (p, n) => `Tienes el ${p} % de las ${n} de armadura necesarias con este golpe.`,
+    bdHeading: 'Desglose de Mitigación', bdArmour: 'Reducción por armadura', bdAdd: 'Reducción fija adicional', bdRes: 'Resistencia elemental', bdThrough: 'Daño que atraviesa la defensa',
+    noteP: 'EHP con este golpe = (Vida + ES) ÷ lo que pasa. Cambia con el tamaño del golpe, por eso el mayor golpe exacto que sobrevives se muestra aparte.',
+    noteE: 'La armadura contra golpes elementales se aplica antes de las resistencias. El EHP cambia con el tamaño del golpe, por eso el mayor golpe exacto que sobrevives se muestra aparte.',
+    invalidSummary: 'Corrige los campos marcados para ver el resultado.', noHit: 'Introduce un golpe entrante mayor que cero para ver una mitigación significativa.',
+    errReq: 'Obligatorio', errRange: (a, b) => `Introduce un número de ${a} a ${b}`,
+    chHeading: 'Los Golpes Más Fuertes Atraviesan Más', chLead: 'Mismas defensas, distintos tamaños de golpe. Arrastra sobre la curva para leer tu reducción con cualquier golpe.',
+    chX: 'Tamaño del golpe bruto (escala log) → reducción %', smallHit: 'Mitad del golpe', selHit: 'Golpe seleccionado', largeHit: 'Doble del golpe',
+    hitSize: 'Golpe bruto', capLine: 'límite 90 %', tipHit: 'Golpe', tipRed: 'reducción', tipTaken: 'recibes',
+    chartAria: (r, h) => `Curva de reducción. Con tu golpe de ${h} la reducción es del ${r} %.`,
+    fTitle: 'Fórmula de armadura', fCodeP: 'Armadura ÷ (Armadura + 10 × Golpe entrante)',
+    fCodeE: 'Armadura × %aplicado ÷ (Armadura × %aplicado + 10 × Golpe entrante), luego × (1 − resistencia)',
+    sTitle: 'Mantén Encendida la Forja', sText: '¿Te ha servido esta herramienta en tu viaje por Wraeclast? Ayúdame a seguir creando herramientas gratuitas para la comunidad.',
+    coffee: 'Invítame a un café', coffeeAria: 'Invítame a un café en Ko-fi (se abre en otra pestaña)',
+    disclaimer: 'Modelo simplificado de un golpe: fórmula y límite del 90 % según <a href="https://mobalytics.gg/poe-2/guides/armour" target="_blank" rel="noopener noreferrer">Mobalytics</a> y su <a href="https://mobalytics.gg/poe-2/guides/damage-defence-calc-order" target="_blank" rel="noopener noreferrer">guía del orden de daño</a>. No incluye rotura de armadura, daño que ignora defensas, recuperación ni otros modificadores. Los parches pueden cambiar la constante; compruébalo en el juego.',
+    fan: 'Calculadora no oficial hecha por fans · Sin relación con Grinding Gear Games'
+  }
+};
+const hasLang = (k) => Object.prototype.hasOwnProperty.call(I18N, k);
+
+/* =============== 3. CAMPOS Y ESTADO =============== */
+const FIELDS = [
+  { k: 'incoming',   types: ['phys', 'ele'], lab: (ty) => ty === 'ele' ? 'fIncomingE' : 'fIncomingP', unit: 'uHit', hint: 'hIncoming', lim: [0, 1e9] },
+  { k: 'armor',      types: ['phys', 'ele'], lab: () => 'fArmor', unit: 'uArmour', hint: 'hArmor', lim: [0, 1e9] },
+  { k: 'additional', types: ['phys'],        lab: () => 'fAdditional', unit: 'uPercent', hint: 'hAdditional', lim: [0, 100] },
+  { k: 'armEle',     types: ['ele'],         lab: () => 'fArmEle', unit: 'uOfArmour', hint: 'hArmEle', lim: [0, 1000] },
+  { k: 'res',        types: ['ele'],         lab: () => 'fRes', unit: 'uRes', hint: 'hRes', lim: [-100, 90], signed: true },
+  { k: 'health',     types: ['phys', 'ele'], lab: () => 'fHealth', unit: 'uHealth', hint: 'hHealth', lim: [0, 1e9] }
+];
+const defaults = () => ({ type: 'phys', incoming: '2400', armor: '16000', additional: '12', armEle: '100', res: '75', health: '4500' });
+const NUMCH = /^[0-9.,\s  '_-]*$/;
+const cleanNum = (v, d) => (typeof v === 'string' && v.length <= 14 && NUMCH.test(v)) ? v : d;
+function cleanState(o) {
+  const d = defaults(); if (!o || typeof o !== 'object') return d;
+  const s = { type: o.type === 'ele' ? 'ele' : 'phys' };
+  for (const f of FIELDS) s[f.k] = cleanNum(o[f.k], d[f.k]);
+  return s;
+}
+const safeGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const safeSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const $ = (id) => document.getElementById(id);
+const reduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+let lang = 'en', state = defaults();
+(function boot() {
+  let urlLang = null;
+  try {
+    const q = new URLSearchParams(location.search);
+    const l = q.get('lang'); if (l && hasLang(l)) urlLang = l;
+    const saved = safeGet('poe2-armour-state'); if (saved) state = cleanState(JSON.parse(saved));
+    if (q.has('t') || q.has('i')) {
+      state = cleanState({ type: q.get('t'), incoming: q.get('i') ?? '', armor: q.get('a') ?? '', additional: q.get('p') ?? '', armEle: q.get('ae') ?? '', res: q.get('r') ?? '', health: q.get('h') ?? '' });
+    }
+  } catch (e) { state = defaults(); }
+  const stored = safeGet('poe2-armor-lang'), nav = (navigator.language || 'en').slice(0, 2).toLowerCase();
+  lang = urlLang || (stored && hasLang(stored) ? stored : (hasLang(nav) ? nav : 'en'));
+})();
+
+/* ---- entrada tolerante: "1,280"  "1.280,5"  "1280.5"  "-5" ---- */
+function parseNum(raw, signed) {
+  let s = String(raw == null ? '' : raw).replace(/[\s  '_]/g, '');
+  if (s === '') return { empty: true };
+  let neg = false;
+  if (signed && s[0] === '-') { neg = true; s = s.slice(1); }
+  if (!/^[0-9.,]+$/.test(s)) return { bad: true };
+  const thSep = lang === 'es' ? '.' : ',';
+  const grouped = (str, sep) => { const p = str.split(sep); return p[0].length >= 1 && p[0].length <= 3 && p.slice(1).every((x) => x.length === 3); };
+  const dots = (s.match(/\./g) || []).length, commas = (s.match(/,/g) || []).length;
+  let int = s, frac = '';
+  if (dots && commas) {
+    const d = Math.max(s.lastIndexOf('.'), s.lastIndexOf(',')), dec = s[d], th = dec === '.' ? ',' : '.';
+    int = s.slice(0, d); frac = s.slice(d + 1);
+    if (int.includes(dec) || !grouped(int, th)) return { bad: true };
+    int = int.split(th).join('');
+  } else if (dots + commas > 1) {
+    const sep = dots ? '.' : ',';
+    if (!grouped(s, sep)) return { bad: true };
+    int = s.split(sep).join('');
+  } else if (dots + commas === 1) {
+    const sep = dots ? '.' : ',', [l, r] = s.split(sep);
+    if (r.length === 3 && l.length >= 1 && l.length <= 3 && sep === thSep) int = l + r; else { int = l; frac = r; }
+  }
+  if (int === '') int = '0';
+  if (!/^\d{1,12}$/.test(int) || !/^\d{0,6}$/.test(frac)) return { bad: true };
+  const v = Number(int + (frac ? '.' + frac : ''));
+  return { v: neg ? -v : v };
+}
+const L = () => (lang === 'es' ? 'es-ES' : 'en-US');
+const nfo = (o) => { try { return new Intl.NumberFormat(L(), Object.assign({ useGrouping: 'always' }, o)); } catch (e) { return new Intl.NumberFormat(L(), o); } };
+function fmt(v, d) {
+  if (v === null || v === undefined || Number.isNaN(v)) return '—';
+  if (!Number.isFinite(v)) return '∞';
+  if (Math.abs(v) >= 1e12) return v.toExponential(2);
+  const dd = d !== undefined ? d : (Math.abs(v) >= 1000 ? 0 : Math.abs(v) >= 100 ? 1 : 2);
+  return nfo({ minimumFractionDigits: 0, maximumFractionDigits: dd }).format(v);
+}
+const fmtP = (r) => nfo({ minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(r * 100);
+const fmtLim = (v) => nfo({ maximumFractionDigits: 2 }).format(v);
+
+/* =============== 4. DOM =============== */
+function el(tag, props, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) { if (v == null || v === false) continue; if (k === 'class') n.className = v; else n.setAttribute(k, v === true ? '' : v); }
+  for (const c of kids.flat()) if (c != null) n.append(c);
+  return n;
+}
+const R = {};   // refs por campo
+(function buildFields() {
+  const box = $('fields');
+  for (const f of FIELDS) {
+    const id = 'f-' + f.k;
+    const inp = el('input', { class: 'num', id, type: 'text', inputmode: f.signed ? 'text' : 'decimal', maxlength: '14', autocomplete: 'off', 'data-k': f.k, 'aria-describedby': id + '-h ' + id + '-e', placeholder: '0' });
+    const wrap = el('span', { class: 'wrap' }, inp);
+    const label = el('label', { for: id }), unit = el('span', { class: 'unit' });
+    const hint = el('p', { class: 'hint', id: id + '-h' }), err = el('p', { class: 'err', id: id + '-e' });
+    wrap.append(unit);
+    const field = el('div', { class: 'field', 'data-k': f.k }, el('div', { class: 'field-top' }, label), wrap, hint, err);
+    box.append(field);
+    R[f.k] = { field, inp, wrap, label, unit, hint, err };
+  }
+})();
+
+const shown = {}, raf = {};
+function animateNum(node, value, render) {
+  const key = node.id, prev = key in shown ? shown[key] : null; shown[key] = value;
+  cancelAnimationFrame(raf[key]);
+  if (reduced || prev === null || !Number.isFinite(prev) || !Number.isFinite(value) || prev === value) { node.textContent = render(value); return; }
+  const t0 = performance.now(), dur = 420;
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    node.textContent = render(prev + (value - prev) * e);
+    if (k < 1) raf[key] = requestAnimationFrame(step); else node.textContent = render(value);
+  };
+  raf[key] = requestAnimationFrame(step);
+}
+
+/* =============== 5. GRÁFICA =============== */
+const CH = { x0: 48, x1: 628, y0: 14, y1: 214 };
+const svgEl = (tag, attrs) => { const n = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, v); return n; };
+let chartModel = null;
+const yOf = (r) => CH.y1 - Math.max(0, Math.min(1, r)) * (CH.y1 - CH.y0);
+function xOf(D, D0) { const lo = Math.log(D0 / 10), hi = Math.log(D0 * 10); return CH.x0 + ((Math.log(D) - lo) / (hi - lo)) * (CH.x1 - CH.x0); }
+function dOf(x, D0) { const lo = Math.log(D0 / 10), hi = Math.log(D0 * 10); return Math.exp(lo + ((x - CH.x0) / (CH.x1 - CH.x0)) * (hi - lo)); }
+const compact = (v) => v >= 1e6 ? fmt(v / 1e6, 1) + 'M' : v >= 1e4 ? fmt(v / 1e3, 0) + 'K' : v >= 1e3 ? fmt(v / 1e3, 1) + 'K' : fmt(v, v < 10 ? 1 : 0);
+function drawAxis(D0) {
+  const g = $('axis'); g.replaceChildren();
+  for (const p of [0, 25, 50, 75, 100]) {
+    const y = yOf(p / 100);
+    g.append(svgEl('line', { class: p === 0 ? 'zero' : 'grid', x1: CH.x0, x2: CH.x1, y1: y, y2: y }));
+    const t = svgEl('text', { x: CH.x0 - 8, y: y + 4, 'text-anchor': 'end' }); t.textContent = p + '%'; g.append(t);
+  }
+  for (const m of [0.1, 0.25, 0.5, 1, 2, 4, 10]) {
+    const x = xOf(D0 * m, D0);
+    g.append(svgEl('line', { class: 'grid', x1: x, x2: x, y1: CH.y0, y2: CH.y1 }));
+    const t = svgEl('text', { x, y: CH.y1 + 17, 'text-anchor': 'middle' }); t.textContent = compact(D0 * m); g.append(t);
+  }
+}
+function drawChart(m, D0, ele) {
+  chartModel = { m, D0 };
+  drawAxis(D0);
+  const pts = [], N = 140;
+  for (let i = 0; i <= N; i++) { const x = CH.x0 + (i / N) * (CH.x1 - CH.x0), D = dOf(x, D0); pts.push([x, yOf(m.at(D).mit)]); }
+  const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
+  $('curve').setAttribute('d', d);
+  $('area').setAttribute('d', d + `L${CH.x1} ${CH.y1}L${CH.x0} ${CH.y1}Z`);
+  const showCap = !ele, cy = yOf(CAP);
+  $('capLine').setAttribute('y1', cy); $('capLine').setAttribute('y2', cy); $('capLine').style.display = showCap ? '' : 'none';
+  const ct = $('capText'); ct.setAttribute('y', cy - 5); ct.textContent = showCap ? I18N[lang].capLine : '';
+  const place = (id, D) => { const n = $(id); n.setAttribute('cx', xOf(D, D0)); n.setAttribute('cy', yOf(m.at(D).mit)); };
+  place('mk', D0); place('gLo', D0 / 2); place('gHi', D0 * 2);
+  const mx = xOf(D0, D0); $('mkLine').setAttribute('x1', mx); $('mkLine').setAttribute('x2', mx);
+}
+function clearChart() {
+  chartModel = null; $('axis').replaceChildren();
+  for (const id of ['curve', 'area']) $(id).setAttribute('d', '');
+  $('capText').textContent = ''; $('capLine').style.display = 'none';
+  for (const id of ['mk', 'gLo', 'gHi']) { $(id).setAttribute('cx', -50); $(id).setAttribute('cy', -50); }
+  $('mkLine').setAttribute('x1', -50); $('mkLine').setAttribute('x2', -50);
+}
+function hover(e) {
+  if (!chartModel) return;
+  const svg = $('chartSvg'), r = svg.getBoundingClientRect(), t = I18N[lang];
+  const vx = Math.max(CH.x0, Math.min(CH.x1, ((e.clientX - r.left) / r.width) * 640));
+  const { m, D0 } = chartModel, D = dOf(vx, D0), a = m.at(D), y = yOf(a.mit);
+  $('hovLine').setAttribute('x1', vx); $('hovLine').setAttribute('x2', vx); $('hovLine').setAttribute('visibility', 'visible');
+  $('hovDot').setAttribute('cx', vx); $('hovDot').setAttribute('cy', y); $('hovDot').setAttribute('visibility', 'visible');
+  const tip = $('tip'); tip.replaceChildren(`${t.tipHit} ${fmt(D, D < 100 ? 1 : 0)} → `, el('b', {}, fmtP(a.mit) + '%'), ` ${t.tipRed} · ${t.tipTaken} ${fmt(a.taken)}`);
+  const px = (vx / 640) * r.width, tw = tip.offsetWidth;
+  tip.style.transform = `translate(${Math.max(0, Math.min(r.width - tw, px - tw / 2))}px, ${Math.max(0, (y / 262) * r.height - 54)}px)`;
+  tip.classList.add('on');
+}
+function unhover() { $('hovLine').setAttribute('visibility', 'hidden'); $('hovDot').setAttribute('visibility', 'hidden'); $('tip').classList.remove('on'); }
+
+/* =============== 6. RENDER =============== */
+const touched = new Set();
+function setErr(k, code) {
+  const t = I18N[lang], r = R[k]; let msg = '';
+  if (code === 'req') msg = t.errReq;
+  else if (code === 'range') { const f = FIELDS.find((x) => x.k === k); msg = t.errRange(fmtLim(f.lim[0]), fmtLim(f.lim[1])); }
+  r.wrap.classList.toggle('bad', !!msg); r.inp.setAttribute('aria-invalid', msg ? 'true' : 'false'); r.err.textContent = msg;
+}
+function pending(kind) {
+  for (const id of ['rVal', 'vEhp', 'vMax', 'vHits', 'bdA', 'bdB', 'bdC', 'needVal']) { $(id).textContent = '—'; delete shown[id]; }
+  if (kind !== 'nohit') { $('vDamage').textContent = '—'; delete shown.vDamage; }
+  for (const id of ['mA', 'mB', 'needBar', 's1b', 's2b', 's3b']) $(id).style.width = '0%';
+  for (const i of [1, 2, 3]) { $('s' + i).textContent = '—'; $('s' + i + 'd').textContent = '—'; }
+  $('needSub').textContent = ''; $('mTrack').setAttribute('aria-valuenow', '0');
+  clearChart(); $('chartSvg').setAttribute('aria-label', I18N[lang].chHeading);
+}
+function render() {
+  const t = I18N[lang], ty = state.type, ele = ty === 'ele';
+  const v = {}, errs = {};
+  for (const f of FIELDS) {
+    if (!f.types.includes(ty)) { setErr(f.k, ''); continue; }
+    const r = parseNum(state[f.k], f.signed);
+    if (r.empty) errs[f.k] = 'req'; else if (r.bad || r.v < f.lim[0] || r.v > f.lim[1]) errs[f.k] = 'range'; else v[f.k] = r.v;
+    setErr(f.k, errs[f.k] === 'req' && !touched.has(f.k) ? '' : errs[f.k] || '');
+  }
+  $('rLabel').textContent = ele ? t.rLabelE : t.rLabelP;
+  $('lgSecond').textContent = ele ? t.lgRes : t.lgAdd; $('bdSecondL').textContent = ele ? t.bdRes : t.bdAdd;
+  $('ehpNote').textContent = ele ? t.noteE : t.noteP; $('fCode').textContent = ele ? t.fCodeE : t.fCodeP;
+  $('needTitle').textContent = t.needTitle; $('mCap').style.display = ele ? 'none' : '';
+  $('rCap').textContent = t.rCap;
+  $('alert').textContent = '';
+  if (Object.keys(errs).length) { pending(); $('alert').textContent = t.invalidSummary; save(); return; }
+
+  const m = makeModel(v, ty), D = v.incoming, H = v.health;
+  if (D === 0) { pending('nohit'); animateNum($('vDamage'), 0, (x) => fmt(x)); $('alert').textContent = t.noHit; save(); return; }
+  const a = m.at(D), taken = a.taken, ehp = H / (taken / D), mh = maxHit(m, H), hits = taken > 0 ? H / taken : Infinity;
+  const capped = a.base + m.e >= CAP - 1e-12;
+
+  animateNum($('rVal'), a.mit * 100, (x) => fmtP(x / 100));
+  $('rCap').textContent = capped ? t.rCapped : t.rCap;
+  animateNum($('vDamage'), taken, (x) => fmt(x));
+  animateNum($('vEhp'), ehp, (x) => fmt(x));
+  animateNum($('vMax'), mh, (x) => fmt(x));
+  animateNum($('vHits'), hits, (x) => (Number.isFinite(x) ? fmt(x, x >= 100 ? 0 : 2) : '∞'));
+  // medidor 0–100 %: armadura + (adicional | resistencia)
+  const segA = ele ? a.base : a.base, segB = Math.max(0, a.mit - segA);
+  $('mA').style.width = segA * 100 + '%'; $('mB').style.width = segB * 100 + '%';
+  $('mTrack').setAttribute('aria-valuenow', String(Number((a.mit * 100).toFixed(2))));
+  $('mTrack').setAttribute('aria-label', ele ? t.rLabelE : t.rLabelP);
+  $('bdA').textContent = fmtP(a.base) + '%';
+  $('bdB').textContent = ele ? fmt(v.res, 2) + '%' : '+' + fmt(v.additional, 2) + '%';
+  $('bdC').textContent = fmtP(1 - a.mit) + '%';
+  // armadura necesaria para el límite
+  const need = armourForCap(m, D, v.armEle), have = v.armor;
+  if (!Number.isFinite(need)) { $('needVal').textContent = '—'; $('needSub').textContent = t.needNone; $('needBar').style.width = '0%'; }
+  else if (need <= 0 || have >= need) { $('needVal').textContent = need <= 0 ? '0' : fmt(need, 0); $('needSub').textContent = t.needDone; $('needBar').style.width = '100%'; }
+  else { $('needVal').textContent = fmt(need, 0); $('needSub').textContent = t.needSub(fmt(have / need * 100, 1), fmt(need, 0)); $('needBar').style.width = (have / need * 100) + '%'; }
+  // tarjetas de tamaño de golpe
+  [[1, D / 2], [2, D], [3, D * 2]].forEach(([i, d]) => {
+    const r = m.at(d);
+    $('s' + i).textContent = fmtP(r.mit) + '%'; $('s' + i + 'd').textContent = `${t.hitSize} ${fmt(d)}`; $('s' + i + 'b').style.width = r.mit * 100 + '%';
+  });
+  drawChart(m, D, ele);
+  $('chartSvg').setAttribute('aria-label', t.chartAria(fmtP(a.mit), fmt(D)));
+  save();
+}
+function save() { safeSet('poe2-armour-state', JSON.stringify(state)); }
+
+function applyLang() {
+  const t = I18N[lang];
+  document.documentElement.lang = lang; document.title = t.docTitle;
+  document.querySelectorAll('[data-i18n]').forEach((n) => { const val = t[n.dataset.i18n]; if (typeof val === 'string') n.textContent = val; });
+  document.querySelectorAll('[data-i18n-aria]').forEach((n) => n.setAttribute('aria-label', t[n.dataset.i18nAria]));
+  $('disclaimer').innerHTML = t.disclaimer;      // marcado fijo del diccionario, sin datos del usuario
+  $('lang-en').setAttribute('aria-pressed', String(lang === 'en')); $('lang-es').setAttribute('aria-pressed', String(lang === 'es'));
+  $('coffee').setAttribute('aria-label', t.coffeeAria);
+  syncType(); render();
+}
+function syncType() {
+  const t = I18N[lang], ty = state.type;
+  document.querySelectorAll('#typeSeg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.type === ty)));
+  $('intro').textContent = ty === 'ele' ? t.introE : t.introP;
+  for (const f of FIELDS) {
+    const r = R[f.k]; r.field.hidden = !f.types.includes(ty);
+    r.label.textContent = t[f.lab(ty)]; r.unit.textContent = t[f.unit]; r.hint.textContent = t[f.hint];
+    if (r.inp !== document.activeElement) r.inp.value = state[f.k];
+  }
+}
+
+/* =============== 7. EVENTOS =============== */
+for (const f of FIELDS) {
+  const { inp } = R[f.k];
+  inp.addEventListener('input', () => { state[f.k] = inp.value; render(); });
+  inp.addEventListener('blur', () => { touched.add(f.k); render(); });
+  inp.addEventListener('keydown', (e) => { if (['e', 'E', '+'].includes(e.key)) e.preventDefault(); if (e.key === '-' && !f.signed) e.preventDefault(); });
+}
+document.querySelectorAll('#typeSeg button').forEach((b) => b.addEventListener('click', () => { state.type = b.dataset.type === 'ele' ? 'ele' : 'phys'; syncType(); render(); }));
+$('lang-en').addEventListener('click', () => { lang = 'en'; safeSet('poe2-armor-lang', lang); applyLang(); });
+$('lang-es').addEventListener('click', () => { lang = 'es'; safeSet('poe2-armor-lang', lang); applyLang(); });
+$('reset').addEventListener('click', () => { state = defaults(); touched.clear(); syncType(); render(); });
+$('copy').addEventListener('click', async () => {
+  const q = new URLSearchParams({ lang, t: state.type, i: state.incoming, a: state.armor, p: state.additional, ae: state.armEle, r: state.res, h: state.health });
+  const url = location.href.split(/[?#]/)[0] + '?' + q.toString(); let ok = false;
+  try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {
+    const ta = el('textarea', { 'aria-hidden': 'true' }); ta.style.cssText = 'position:fixed;opacity:0'; ta.value = url; document.body.append(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch (_) {} ta.remove();
+  }
+  const lab = $('copyLabel'); lab.textContent = ok ? I18N[lang].copied : I18N[lang].copyFail;
+  clearTimeout($('copy')._t); $('copy')._t = setTimeout(() => { lab.textContent = I18N[lang].copy; }, 1800);
+});
+const ov = $('ov'); ov.addEventListener('pointermove', hover); ov.addEventListener('pointerdown', hover); ov.addEventListener('pointerleave', unhover); ov.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') unhover(); });
+
+/* polvo incandescente */
+if (!reduced) {
+  const box = $('dust'), n = innerWidth < 600 ? 8 : 16;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('span');
+    s.style.setProperty('--x', (Math.random() * 100).toFixed(1) + '%'); s.style.setProperty('--s', (2 + Math.random() * 3).toFixed(1) + 'px');
+    s.style.setProperty('--d', (12 + Math.random() * 12).toFixed(1) + 's'); s.style.setProperty('--l', (-Math.random() * 22).toFixed(1) + 's');
+    s.style.setProperty('--dx', ((Math.random() - 0.5) * 120).toFixed(0) + 'px'); box.append(s);
+  }
+}
+applyLang();
+})();
+</script>
+</body>
+</html>
